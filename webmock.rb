@@ -1,44 +1,30 @@
-require 'webmock/minitest'
+# frozen_string_literal: true
+require 'http'
+require 'yaml'
+require 'json'
 
 require 'webmock'
 include WebMock::API
 WebMock.enable!
 
-stub_request(:get, FaceGroup::FbApi::FB_TOKEN_URL).with(
+FB_TOKEN_URL = 'https://graph.facebook.com/v2.8/oauth/access_token'
+CREDENTIALS = YAML.load(File.read('config/credentials.yml'))
+
+stub_request(:get, FB_TOKEN_URL).with(
   query: { 'client_id' => CREDENTIALS[:client_id],
            'client_secret' => CREDENTIALS[:client_secret],
            'grant_type' => 'client_credentials' }
 ).to_return(
-  status: FB_RESPONSE[:access_token].status.to_i,
-  headers: FB_RESPONSE[:access_token].headers,
-  body: FB_RESPONSE[:access_token].body.to_s
+  status: 200,
+  body: { access_token: CREDENTIALS[:access_token] }.to_json
 )
 
-group_url = URI.join(FaceGroup::FbApi::FB_API_URL, CREDENTIALS[:group_id].to_s)
-stub_request(:get, group_url).with(
-  query: { 'access_token' => FB_RESULT[:access_token] }
-).to_return(
-  status: FB_RESPONSE[:group].status.to_i,
-  headers: FB_RESPONSE[:group].headers,
-  body: FB_RESPONSE[:group].body.to_s
+response = HTTP.get(
+  FB_TOKEN_URL,
+  params: { 'client_id' => CREDENTIALS[:client_id],
+            'client_secret' => CREDENTIALS[:client_secret],
+            'grant_type' => 'client_credentials' }
 )
 
-feed_url = group_url.to_s + '/feed'
-stub_request(:get, feed_url).with(
-  query: { 'access_token' => FB_RESULT[:access_token] }
-).to_return(
-  status: FB_RESPONSE[:feed].status.to_i,
-  headers: FB_RESPONSE[:feed].headers,
-  body: FB_RESPONSE[:feed].body.to_s
-)
-
-posting_id = FB_RESULT[:posting]['id']
-attachment_url = URI.join(FaceGroup::FbApi::FB_API_URL,
-                          "#{posting_id}/attachments")
-stub_request(:get, attachment_url).with(
-  query: { 'access_token' => FB_RESULT[:access_token] }
-).to_return(
-  status: FB_RESPONSE[:attachment].status.to_i,
-  headers: FB_RESPONSE[:attachment].headers,
-  body: FB_RESPONSE[:attachment].body.to_s
-)
+puts response.status
+puts response.body.to_s
