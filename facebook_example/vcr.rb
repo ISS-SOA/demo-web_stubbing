@@ -1,22 +1,20 @@
 # frozen_string_literal: true
+
 require 'http'
 require 'yaml'
 
+require 'vcr'
 require 'webmock'
-include WebMock::API
-WebMock.enable!
 
 FB_TOKEN_URL = 'https://graph.facebook.com/v2.8/oauth/access_token'
 CREDENTIALS = YAML.load(File.read('config/credentials.yml'))
 
-stub_request(:get, FB_TOKEN_URL).with(
-  query: { 'client_id' => CREDENTIALS[:client_id],
-           'client_secret' => CREDENTIALS[:client_secret],
-           'grant_type' => 'client_credentials' }
-).to_return(
-  status: 200,
-  body: { access_token: CREDENTIALS[:access_token] }.to_json
-)
+VCR.configure do |c|
+  c.cassette_library_dir = 'cassettes'
+  c.hook_into :webmock
+end
+
+VCR.insert_cassette 'token', record: :new_episodes
 
 response = HTTP.get(
   FB_TOKEN_URL,
@@ -27,3 +25,5 @@ response = HTTP.get(
 
 puts response.status
 puts response.body.to_s
+
+VCR.eject_cassette

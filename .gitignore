@@ -1,2 +1,2 @@
-credentials.yml
+**/config/*.yml
 cassettes/
