@@ -22,7 +22,7 @@ stub_request(:get, github_url).with(
 )
 
 response = HTTP.get(
-  github_url, 
+  github_url,
   headers: { 'Accept' => 'application/vnd.github.v3+json',
              'Authorization' => "token #{GH_TOKEN}" }
 )
@@ -30,5 +30,5 @@ response = HTTP.get(
 puts response.status
 # 200 OK
 
-puts response.body.to_s
+puts response.body
 # {"size":551,"owner":{"login":"soumyaray","id":1926704,"avatar_url":...

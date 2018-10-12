@@ -14,7 +14,7 @@ VCR.configure do |c|
   c.hook_into :webmock
 end
 
-VCR.insert_cassette 'repo', record: :new_episodes
+VCR.insert_cassette 'github_api', record: :new_episodes
 
 github_url = 'https://api.github.com/repos/soumyaray/YPBT-app'
 
@@ -25,6 +25,6 @@ response = HTTP.get(
 )
 
 puts response.status
-puts response.body.to_s
+puts response.body
 
 VCR.eject_cassette

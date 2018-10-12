@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 source 'https://rubygems.org'
+ruby '2.5.1'
 
-gem 'http'
-gem 'vcr'
-gem 'webmock'
+gem 'http', '~> 3.3'
+gem 'vcr', '~> 4.0'
+gem 'webmock', '~> 3.4'
